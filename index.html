@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRA - Automated Store Transaction and Records Assistant</title>
+    <style>
+        /* General table styling */
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 2px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        /* Style for Paid status (Green) */
+        td[style*="color: green"] {
+            color: green !important; 
+        }
+        /* Ensure Pending status is black */
+        td[style*="color: black"] {
+            color: black !important;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center;">ASTRA: Automated Store Transaction and Records Assistant</h1>
+    <hr>
+
+    <br>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px;">
+        <div style="flex: 1; min-width: 300px;">
+            <h2>Process a New Sale</h2>
+            <br>
+            <label for="customerName">Customer Name:</label>
+            <br>
+            <input type="text" id="customerName" placeholder="Required for Credit; Optional for Cash" style="width: 95%;">
+            <br><br>
+            <label for="itemsSoldName">Product Name:</label>
+            <br>
+            <input type="text" id="itemsSoldName" placeholder="Type to search product" oninput="showProductDropdown()" style="width: 95%;">
+            <br>
+            <ul id="product-dropdown" style="list-style-type: none; padding: 0; margin: 0; border: 1px solid black; max-height: 150px; overflow-y: auto; position: absolute; background: white; z-index: 10; display: none; width: 95%;"></ul>
+            <br>
+            <label for="itemsSoldQuantity">Quantity:</label>
+            <br>
+            <input type="number" id="itemsSoldQuantity" placeholder="e.g., 2" min="1" style="width: 95%;">
+            <br><br>
+            <button onclick="addItemToSale()">Add Item</button>
+            <br><br>
+            <hr>
+            <h3>Current Order</h3>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table id="order-summary-items" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <br><br>
+            <hr>
+            <h4>Subtotal: <span id="subtotal">₱0.00</span></h4>
+            <br><br>
+            <label for="cashReceived">Cash Received (₱):</label>
+            <br>
+            <input type="number" id="cashReceived" placeholder="Enter cash" step="0.01" min="0" oninput="calculateChange()" style="width: 95%;">
+            <br><br>
+            <h4>Change: <span id="change">₱0.00</span></h4>
+            <br><br>
+            <hr>
+            <button onclick="processSale('Cash')">Process Cash Sale</button>
+            <button onclick="processSale('Credit')">Process Credit Sale</button>
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <h2>Store Management & Inventory</h2>
+            <br>
+            <h3>Add / Update Product</h3>
+            <br>
+            <label for="productName">Product Name:</label>
+            <br>
+            <input type="text" id="productName" placeholder="Product Name" style="width: 95%;">
+            <br><br>
+            <label for="productUnit">Unit of Measure:</label>
+            <br>
+            <select id="productUnit" style="width: 95%;">
+                <option value="pc">pc (Piece)</option>
+                <option value="kg">kg (Kilogram)</option>
+                <option value="g">g (Gram)</option>
+                <option value="L">L (Liter)</option>
+                <option value="mL">mL (Milliliter)</option>
+                <option value="pack">pack (Package)</option>
+                <option value="doz">doz (Dozen)</option>
+            </select>
+            <br><br>
+            <label for="productStock">Stock:</label>
+            <br>
+            <input type="number" id="productStock" placeholder="Stock" min="0" style="width: 95%;">
+            <br><br>
+            <label for="productPrice">Price (₱):</label>
+            <br>
+            <input type="number" id="productPrice" placeholder="Price (₱)" step="0.01" min="0" style="width: 95%;">
+            <br><br>
+            <button onclick="addProduct()" id="addProductButton">Add Product</button>
+            <button onclick="cancelEdit()" id="cancelEditButton" style="display:none;">CANCEL</button>
+            <br><br>
+            <hr>
+            <h3>Upload Product List (from .txt file)</h3>
+            <br>
+            <input type="file" id="uploadProductList" accept=".txt">
+            <button onclick="uploadProductsFromFile()">Process Upload</button>
+            <br><br>
+            <hr>
+            <h3>Product Inventory</h3>
+            <div id="inventory-display" style="max-height: 500px; overflow-y: auto;"></div>
+        </div>
+    </div>
+    
+    <br><br>
+    <hr>
+    
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px;">
+        <div style="flex: 1; min-width: 250px;">
+            <h2>Daily Sales</h2>
+            <div id="sales-display" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+        
+        <div style="flex: 1; min-width: 250px;">
+            <h2>Credit History Search</h2>
+            <label for="creditCustomerSearch">Search Customer Utang:</label>
+            <br>
+            <input type="text" id="creditCustomerSearch" placeholder="Enter Customer Name (Leave blank to show ALL)" oninput="displayCreditHistory()" style="width: 95%;">
+            <br><br>
+            <div id="creditHistoryDetails" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 5px;">
+                <p>Loading credit history...</p>
+            </div>
+            <br>
+            <h3>Overall Pending Balance: <span id="creditTotal">₱0.00</span></h3>
+        </div>
+        
+        <div style="flex: 1; min-width: 250px;">
+            <h2>Record Customer Payment</h2>
+            
+            <label for="paymentCustomerName">Customer:</label>
+            <br>
+            <select id="paymentCustomerName" onchange="populatePendingTransactions()" style="width: 95%;"></select>
+            <br><br>
+
+            <label for="pendingTransactionId">Specific Transaction (for Partial Payment):</label>
+            <br>
+            <select id="pendingTransactionId" onchange="updateAmountPaidPlaceholder()" style="width: 95%;"></select>
+            <br><br>
+            
+            <label for="amountPaid">Amount Paid (₱):</label>
+            <br>
+            <input type="number" id="amountPaid" placeholder="Enter amount paid" step="0.01" min="0" style="width: 95%;">
+            <br><br>
+            
+            <button onclick="recordPayment()">Process Payment</button>
+        </div>
+    </div>
+    
+    <br><br>
+    <hr>
+    
+    <h2>System Log</h2>
+    <pre id="output-log" style="border: 1px solid black; padding: 10px; min-height: 250px; background-color: #f9f9f9; overflow-y: scroll;"></pre>
+    <br><br>
+    <button onclick="exportDataAsTxt('inventory')">Export Inventory to .txt</button>
+    <button onclick="exportDataAsTxt('credit')">Export Credit History to .txt</button>
+    <button onclick="exportDataAsTxt('log')">Export System Log to .txt</button>
+
+    <script src="app.js"></script>
+</body>
+</html>
