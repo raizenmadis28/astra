@@ -1,0 +1,63 @@
+/* Gradient banner (blue) */
+.banner-gradient {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca, #1f6feb);
+}
+
+/* Row card look: wide + airy */
+.card-row {
+  border: 0;
+  border-radius: 1rem;
+}
+.card-row .card-header {
+  border-bottom: 0;
+}
+.card-row .card-body {
+  padding-top: 1rem;
+}
+
+/* Sticky footer on cards so actions remain visible */
+.card-footer-sticky {
+  position: sticky;
+  bottom: -1px;             /* keeps shadow edge clean */
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,.075);
+  padding: 0.75rem 1rem;
+  z-index: 2;
+}
+
+/* Elevated dropdown under product search */
+.dropdown-elevated {
+  z-index: 1000;
+  max-height: 220px;
+  overflow: auto;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.12);
+}
+#product-dropdown.list-group > li { cursor: pointer; }
+#product-dropdown.list-group > li:hover { background-color: #f1f3f5; }
+
+/* Tables inside dynamic containers */
+.table-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+
+/* Sticky table header helper */
+.sticky-head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* SweetAlert tweaks for a softer feel */
+.swal2-popup {
+  border-radius: 0.75rem !important;
+}
+
+/* Slightly wider container on desktop for a true "row" feel */
+@media (min-width: 1400px) {
+  .container-xl {
+    max-width: 1320px;
+  }
+}
